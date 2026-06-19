@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Church Event Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero__copy">
+        <p class="eyebrow">Ministry Coordination</p>
+        <h1>Church Event Planner</h1>
+        <p class="hero__text">
+          Organize the church year with one clear place for dates, volunteers, budgets,
+          checklists, and event notes.
+        </p>
+        <div class="hero__actions">
+          <button id="newPlannerButton" class="button button--ghost" type="button">New Planner</button>
+          <button id="openPlannerButton" class="button button--secondary" type="button">Open Planner</button>
+          <button id="savePlannerButton" class="button button--secondary" type="button">Save Planner As</button>
+          <button id="printPlannerButton" class="button button--secondary" type="button">Print Planner</button>
+          <button id="resetDataButton" class="button button--ghost" type="button">Reset Demo Data</button>
+          <button id="settingsButton" class="button button--ghost" type="button">Settings</button>
+          <input id="importDataInput" type="file" accept="application/json" class="visually-hidden">
+          <span class="save-indicator" id="saveIndicator">Saved locally in this browser</span>
+        </div>
+      </div>
+      <div class="hero__panel">
+        <h2>This Planner Helps You Track</h2>
+        <ul class="hero__list">
+          <li>Seasonal worship events and outreach programs</li>
+          <li>Coordinators, volunteer teams, and supply lists</li>
+          <li>Budgets, deadlines, and planning progress</li>
+        </ul>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel--events">
+        <div class="panel__heading">
+          <div>
+            <p class="eyebrow">Church Year</p>
+            <h2>Events</h2>
+          </div>
+        </div>
+        <div class="panel__tools">
+          <div class="summary-pill" id="eventCount">0 events</div>
+          <button id="addEventButton" class="button button--primary" type="button">Add Event</button>
+        </div>
+        <div class="event-section">
+          <div class="section-label">
+            <h3>Active Events</h3>
+            <span class="section-count" id="activeEventCount">0</span>
+          </div>
+          <div class="event-list" id="eventList" aria-label="Active church events"></div>
+        </div>
+        <div class="event-section">
+          <div class="section-label">
+            <h3>Archived Events</h3>
+            <span class="section-count" id="archivedEventCount">0</span>
+          </div>
+          <div class="event-list" id="archivedEventList" aria-label="Archived church events"></div>
+        </div>
+      </section>
+
+      <section class="panel panel--details">
+        <div id="emptyState" class="empty-state">
+          <h2>Select an Event</h2>
+          <p>Choose an event from the left to update the planning details.</p>
+        </div>
+
+        <form id="eventForm" class="event-form hidden">
+          <div class="panel__heading">
+            <div>
+              <p class="eyebrow">Planning Details</p>
+              <h2 id="eventTitle">Event Title</h2>
+            </div>
+            <div class="detail-actions">
+              <div class="status-badge" id="statusBadge">Planning</div>
+              <button id="generateBriefButton" class="button button--ai hidden" type="button">AI Brief</button>
+              <button id="printEventButton" class="button button--secondary" type="button">Print Event</button>
+              <button id="archiveEventButton" class="button button--secondary" type="button">Archive Event</button>
+              <button id="restoreEventButton" class="button button--secondary hidden" type="button">Restore Event</button>
+              <button id="deleteEventButton" class="button button--danger" type="button">Delete Event</button>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              Event Date
+              <input id="eventDate" name="eventDate" type="date">
+            </label>
+            <label>
+              Coordinator
+              <input id="eventCoordinator" name="eventCoordinator" type="text" placeholder="Name of team lead">
+            </label>
+            <label>
+              Ministry Area
+              <input id="eventCategory" name="eventCategory" type="text" placeholder="Worship, outreach, youth, fellowship">
+            </label>
+            <label>
+              Budget
+              <input id="eventBudget" name="eventBudget" type="number" min="0" step="0.01" placeholder="0.00">
+            </label>
+            <label class="label--full">
+              Theme or Goal
+              <input id="eventTheme" name="eventTheme" type="text" placeholder="Theme, scripture, or ministry goal">
+            </label>
+            <label class="label--full">
+              Notes
+              <textarea id="eventNotes" name="eventNotes" rows="4" placeholder="Add reminders, program ideas, or important contacts"></textarea>
+            </label>
+          </div>
+
+          <section class="subsection">
+            <div class="subsection__header">
+              <h3>Planning Checklist</h3>
+              <p>Mark tasks complete as your team moves forward.</p>
+            </div>
+            <div id="checklistContainer" class="checklist"></div>
+          </section>
+
+          <section class="subsection hidden" id="aiAssistSection">
+            <div class="subsection__header">
+              <h3>AI Planning Assistant</h3>
+              <p>Ask for suggestions, missing tasks, themes, or coordinator notes.</p>
+            </div>
+            <div class="ai-assist">
+              <div class="ai-quick-actions">
+                <button class="button button--ghost ai-quick-btn" type="button" data-prompt="What tasks am I missing from this checklist to make this event successful?">What am I missing?</button>
+                <button class="button button--ghost ai-quick-btn" type="button" data-prompt="Suggest 3 specific theme ideas for this event with a brief explanation of each.">Suggest themes</button>
+                <button class="button button--ghost ai-quick-btn" type="button" data-prompt="Write a short, practical coordinator note for this event covering the most important things to remember.">Write coordinator note</button>
+              </div>
+              <div class="ai-input-row">
+                <textarea id="aiQuestion" rows="2" placeholder="Ask anything about this event's planning…"></textarea>
+                <button id="aiAskButton" class="button button--primary" type="button">Ask</button>
+              </div>
+              <div id="aiResponse" class="ai-response hidden"></div>
+            </div>
+          </section>
+
+          <section class="subsection subsection--split">
+            <div>
+              <div class="subsection__header">
+                <h3>Volunteers</h3>
+                <p>One name per line.</p>
+              </div>
+              <textarea id="eventVolunteers" name="eventVolunteers" rows="8" placeholder="Hospitality Team&#10;Choir Leader&#10;Youth Helpers"></textarea>
+            </div>
+            <div>
+              <div class="subsection__header">
+                <h3>Supplies</h3>
+                <p>Track what must be prepared or purchased.</p>
+              </div>
+              <textarea id="eventSupplies" name="eventSupplies" rows="8" placeholder="Programs&#10;Decorations&#10;Sound equipment"></textarea>
+            </div>
+          </section>
+
+          <div class="form-actions">
+            <button id="saveUpdatesButton" class="button button--primary" type="button">Save Updates</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add Event Modal -->
+  <div id="eventModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
+    <div class="modal__backdrop" id="eventModalBackdrop"></div>
+    <div class="modal__panel">
+      <div class="modal__header">
+        <div>
+          <p class="eyebrow">New Event</p>
+          <h2 id="eventModalTitle">Add a Church Event</h2>
+        </div>
+        <button id="closeEventModalButton" class="button button--ghost" type="button">Cancel</button>
+      </div>
+
+      <form id="addEventForm" class="form-grid">
+        <label>
+          Event Title
+          <input id="newEventTitle" name="title" type="text" placeholder="Community Prayer Night" required>
+        </label>
+        <label>
+          Season or Focus
+          <input id="newEventSeason" name="season" type="text" placeholder="Outreach" value="Special Event">
+        </label>
+        <label>
+          Event Date
+          <input id="newEventDate" name="date" type="date">
+        </label>
+        <label>
+          Coordinator
+          <input id="newEventCoordinator" name="coordinator" type="text" placeholder="Name of team lead">
+        </label>
+        <label>
+          Ministry Area
+          <input id="newEventCategory" name="category" type="text" placeholder="Worship, outreach, youth, fellowship">
+        </label>
+        <label>
+          Budget
+          <input id="newEventBudget" name="budget" type="number" min="0" step="0.01" placeholder="0.00">
+        </label>
+        <label class="label--full">
+          Theme or Goal
+          <input id="newEventTheme" name="theme" type="text" placeholder="Theme, scripture, or ministry goal">
+        </label>
+        <label class="label--full">
+          Notes
+          <textarea id="newEventNotes" name="notes" rows="4" placeholder="Add reminders, program ideas, or important contacts"></textarea>
+        </label>
+
+        <div id="aiSetupRow" class="ai-setup-row label--full hidden">
+          <label class="ai-setup-label">
+            <input type="checkbox" id="aiSetupToggle" checked>
+            AI Setup — generate a checklist, volunteers &amp; supplies for this event
+          </label>
+        </div>
+
+        <div class="modal__actions label--full">
+          <button class="button button--primary" type="submit">Create Event</button>
+          <button id="secondaryCancelEventModalButton" class="button button--secondary" type="button">Keep Planning</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal__backdrop" id="settingsModalBackdrop"></div>
+    <div class="modal__panel">
+      <div class="modal__header">
+        <div>
+          <p class="eyebrow">Configuration</p>
+          <h2 id="settingsModalTitle">Settings</h2>
+        </div>
+        <button id="closeSettingsModalButton" class="button button--ghost" type="button">Close</button>
+      </div>
+
+      <section class="settings-section">
+        <h3>AI Assistant</h3>
+        <p class="settings-note">
+          Add an OpenAI API key to unlock AI-powered features: smart event setup, a planning assistant,
+          and event brief generation. Your key is saved only in this browser and is never sent anywhere
+          except directly to OpenAI. AI features require an internet connection.
+        </p>
+
+        <div id="aiKeySetState" class="ai-key-status is-set hidden">
+          <div class="ai-key-dot"></div>
+          <span id="aiKeyStatusText">AI features active</span>
+          <button id="removeKeyButton" class="button button--ghost ai-key-remove" type="button">Remove Key</button>
+        </div>
+
+        <div id="aiKeyInputState" class="settings-key-row">
+          <label>
+            OpenAI API Key
+            <input id="apiKeyInput" type="password" placeholder="sk-...">
+          </label>
+          <div class="modal__actions" style="padding-top: 0;">
+            <button id="saveKeyButton" class="button button--primary" type="button">Save Key</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- AI Brief Modal -->
+  <div id="briefModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="briefModalTitle">
+    <div class="modal__backdrop" id="briefModalBackdrop"></div>
+    <div class="modal__panel modal__panel--wide">
+      <div class="modal__header">
+        <div>
+          <p class="eyebrow">AI Generated</p>
+          <h2 id="briefModalTitle">Event Brief</h2>
+        </div>
+        <button id="closeBriefModalButton" class="button button--ghost" type="button">Close</button>
+      </div>
+      <div id="briefContent" class="brief-content"></div>
+      <div class="modal__actions">
+        <button id="copyBriefButton" class="button button--secondary" type="button">Copy to Clipboard</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
