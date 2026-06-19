@@ -31,14 +31,24 @@ When an event is finished, click **Archive Event** to move it out of the active 
 
 ---
 
-## Saving and Sharing the Planner
+## Saving and Publishing the Planner
 
-The planner saves automatically in your browser. To back it up or share it with someone else:
+The planner saves automatically in your browser as you work. There are two ways to preserve and share your data:
 
-- Click **Save Planner As** to download a copy of all events as a file.
-- Click **Open Planner** to load a previously saved file.
+### Publish Planner (share with everyone)
+Click **Publish Planner** to download a file called `planner.json`. Upload that file to the church GitHub repository and it becomes the version everyone sees when they visit the planner for the first time. This is how you keep the shared church planner up to date.
 
-> **Tip:** Save a copy before making major changes so you always have a backup.
+**How to upload to GitHub:**
+1. Click **Publish Planner** — saves `planner.json` to your Downloads folder
+2. Go to the church GitHub repository in your browser
+3. Click **Add file → Upload files**
+4. Drag `planner.json` into the window and click **Commit changes**
+5. Within a minute the site is updated for everyone
+
+### Save Planner As (personal backup)
+Click **Save Planner As** to download a dated backup file for your own records. Use **Open Planner** to restore from a backup if needed.
+
+> **Tip:** Publish after any major update — new events, archived completions, or coordinator changes — so the site always reflects the current state.
 
 ---
 
@@ -84,10 +94,12 @@ To remove the key, go back to **Settings** and click **Remove Key**.
 
 When a new coordinator takes over:
 
-1. Share the planner web address with them.
-2. Click **Save Planner As** and send them the downloaded file.
-3. They open the planner, click **Open Planner**, and load that file to pick up exactly where you left off.
+1. Click **Publish Planner** and upload `planner.json` to GitHub (see steps above) so the site has the latest data.
+2. Share the planner web address with the new coordinator.
+3. When they open the link for the first time — no data in their browser yet — the planner automatically loads the published version from the site. They pick up exactly where you left off.
 4. If they want AI features, they set up their own OpenAI API key in Settings using the steps above.
+
+No file to email. No manual import step. They just open the link.
 
 ---
 

@@ -233,15 +233,38 @@ const copyBriefButton = document.getElementById("copyBriefButton");
 
 function loadEvents() {
   const raw = localStorage.getItem(storageKey);
-  if (!raw) {
-    return structuredClone(defaultEvents);
-  }
+  if (!raw) return structuredClone(defaultEvents);
 
   try {
     return sanitizeEvents(JSON.parse(raw));
   } catch {
     return structuredClone(defaultEvents);
   }
+}
+
+async function initPlanner() {
+  const hasLocal = Boolean(localStorage.getItem(storageKey));
+
+  if (!hasLocal) {
+    try {
+      const response = await fetch("planner.json");
+      if (response.ok) {
+        const data = await response.json();
+        const events = sanitizeEvents(data);
+        state.events = events;
+        state.selectedId = events[0]?.id ?? null;
+        saveEvents();
+        render();
+        saveIndicator.textContent = "Loaded the church planner from the site";
+        return;
+      }
+    } catch {
+      // No planner.json on the site yet — use starter events, that's fine
+    }
+  }
+
+  state.selectedId = state.events[0]?.id ?? null;
+  render();
 }
 
 function saveEvents() {
@@ -1034,7 +1057,15 @@ document.addEventListener("keydown", (e) => {
   if (!briefModal.classList.contains("hidden")) closeBriefModal();
 });
 
+// --- Publish Planner ---
+
+function publishPlanner() {
+  downloadTextFile("planner.json", JSON.stringify(state.events, null, 2));
+  saveIndicator.textContent = "planner.json downloaded — upload it to GitHub to publish for everyone";
+}
+
+document.getElementById("publishPlannerButton").addEventListener("click", publishPlanner);
+
 // ===== INIT =====
 
-state.selectedId = state.events[0]?.id ?? null;
-render();
+initPlanner();
